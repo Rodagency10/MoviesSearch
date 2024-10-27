@@ -1,65 +1,84 @@
 import React, { useState } from "react";
-import { useSearchMoviesQuery } from "../services/omdbApi";
 import { useFilter } from "../contexts/FilterContext";
 import { Button } from "./ui/button";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../store/store";
-import { setSearchTerm } from "../store/searchSlice";
+import {
+  useDiscoverMoviesQuery,
+  useSearchMoviesQuery,
+} from "@/services/moviesApi";
+import SearchBar from "./SearchBar";
+import MovieItem from "./MovieItem";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 interface MovieListProps {
-  onSelectMovie: (imdbID: string) => void;
+  onSelectMovie: (movieId: number) => void;
 }
 
 const MovieList: React.FC<MovieListProps> = ({ onSelectMovie }) => {
   const [page, setPage] = useState(1);
-  const { genre, year } = useFilter();
-  const dispatch = useDispatch();
-  const search = useSelector((state: RootState) => state.search.searchTerm);
-  const { data, error, isLoading } = useSearchMoviesQuery({ search, page });
+  const { genreId, releaseYear } = useFilter();
 
-  console.log(data);
+  const [activeSearch, setActiveSearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
-  console.log(genre);
+  const handleSearch = (search: string) => {
+    setActiveSearch(search);
+    setIsSearching(true);
+    setPage(1);
+  };
 
-  const filteredMovies = data?.Search?.filter(
-    (movie) =>
-      (!genre || movie.Genre?.split(",").includes(genre)) &&
-      (!year || movie.Year === year)
+  const discoverQuery = useDiscoverMoviesQuery({
+    page,
+    genreId,
+    year: releaseYear,
+  });
+  const searchQuery = useSearchMoviesQuery(
+    { query: activeSearch, page, year: releaseYear },
+    { skip: !isSearching }
   );
 
-  if (isLoading) return <div>Chargement...</div>;
-  if (error) return <div>Erreur serveur: {JSON.stringify(error)}</div>;
+  const { data, error, isLoading } = isSearching ? searchQuery : discoverQuery;
+
+  if (isLoading) return <div className="text-center">Chargement...</div>;
+  if (error)
+    return (
+      <div className="text-center text-red-500">
+        Erreur serveur: {JSON.stringify(error)}
+      </div>
+    );
 
   return (
     <div>
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => dispatch(setSearchTerm(e.target.value))}
-        placeholder="Rechercher des films..."
-        className="mb-4 p-2 border rounded"
-      />
-      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredMovies?.map((movie) => (
-          <li key={movie.imdbID} className="border p-4 rounded">
-            <img
-              src={movie.Poster}
-              alt={movie.Title}
-              className="w-full h-auto"
-            />
-            <h3 className="font-bold">{movie.Title}</h3>
-            <p>{movie.Year}</p>
-            <Button onClick={() => onSelectMovie(movie.imdbID)}>
-              Voir les détails
-            </Button>
-          </li>
+
+      {/* Barre de recherche */}
+      <SearchBar onSearch={handleSearch} />
+
+      <h2 className="text-2xl font-bold mb-4">Résultats</h2>
+
+      {/* Liste des films */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {data?.results.map((movie) => (
+          <MovieItem key={movie.id} movie={movie} onSelect={onSelectMovie} />
         ))}
-      </ul>
-      <div className="mt-4">
-        <Button onClick={() => setPage(page - 1)} disabled={page === 1}>
+      </div>
+
+      {/* Boutons de pagination */}
+      <div className="my-8 flex justify-center gap-4">
+        <Button
+          onClick={() => setPage(page - 1)}
+          disabled={page === 1}
+          className=""
+        >
+          <ChevronLeftIcon className="w-4 h-4" />
           Précédent
         </Button>
-        <Button onClick={() => setPage(page + 1)}>Suivant</Button>
+        <Button
+          onClick={() => setPage(page + 1)}
+          disabled={page === data?.total_pages}
+          className=""
+        >
+          Suivant
+          <ChevronRightIcon className="w-4 h-4" />
+        </Button>
       </div>
     </div>
   );

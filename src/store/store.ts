@@ -1,15 +1,15 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { setupListeners } from '@reduxjs/toolkit/query';
-import { omdbApi } from '../services/omdbApi';
-import searchReducer from './searchSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
+import { moviesApi } from "../services/moviesApi";
+import searchReducer from "./searchSlice";
 
 export const store = configureStore({
   reducer: {
-    [omdbApi.reducerPath]: omdbApi.reducer,
+    [moviesApi.reducerPath]: moviesApi.reducer,
     search: searchReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(omdbApi.middleware),
+    getDefaultMiddleware().concat(moviesApi.middleware),
 });
 
 setupListeners(store.dispatch);

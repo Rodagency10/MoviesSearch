@@ -1,104 +1,73 @@
 import React from "react";
-import { useGetMovieDetailsQuery } from "../services/omdbApi";
 import { Button } from "./ui/button";
+import { useGetMovieDetailsQuery } from "@/services/moviesApi";
 
 interface MovieDetailsProps {
-  imdbID: string;
+  movieId: number;
   onClose: () => void;
 }
 
-// {
-//   "Title": "Everything Everywhere All at Once",
-//   "Year": "2022",
-//   "Rated": "R",
-//   "Released": "08 Apr 2022",
-//   "Runtime": "139 min",
-//   "Genre": "Action, Adventure, Comedy",
-//   "Director": "Daniel Kwan, Daniel Scheinert",
-//   "Writer": "Daniel Kwan, Daniel Scheinert",
-//   "Actors": "Michelle Yeoh, Stephanie Hsu, Jamie Lee Curtis",
-//   "Plot": "A middle-aged Chinese immigrant is swept up into an insane adventure in which she alone can save existence by exploring other universes and connecting with the lives she could have led.",
-//   "Language": "English, Mandarin, Cantonese",
-//   "Country": "United States",
-//   "Awards": "Won 7 Oscars. 405 wins & 374 nominations total",
-//   "Poster": "https://m.media-amazon.com/images/M/MV5BOWNmMzAzZmQtNDQ1NC00Nzk5LTkyMmUtNGI2N2NkOWM4MzEyXkEyXkFqcGc@._V1_SX300.jpg",
-//   "Ratings": [
-//       {
-//           "Source": "Internet Movie Database",
-//           "Value": "7.8/10"
-//       },
-//       {
-//           "Source": "Rotten Tomatoes",
-//           "Value": "93%"
-//       },
-//       {
-//           "Source": "Metacritic",
-//           "Value": "81/100"
-//       }
-//   ],
-//   "Metascore": "81",
-//   "imdbRating": "7.8",
-//   "imdbVotes": "552,248",
-//   "imdbID": "tt6710474",
-//   "Type": "movie",
-//   "DVD": "N/A",
-//   "BoxOffice": "$77,191,785",
-//   "Production": "N/A",
-//   "Website": "N/A",
-//   "Response": "True"
-// }
+const MovieDetails: React.FC<MovieDetailsProps> = ({ movieId, onClose }) => {
+  const { data: movie, error, isLoading } = useGetMovieDetailsQuery(movieId);
 
-const MovieDetails: React.FC<MovieDetailsProps> = ({ imdbID, onClose }) => {
-  const { data: movie, error, isLoading } = useGetMovieDetailsQuery(imdbID);
+  if (isLoading) return <div className="text-center text-white">Chargement...</div>;
+  if (error) return <div className="text-center text-red-500">Une erreur est survenue: {JSON.stringify(error)}</div>;
+  if (!movie) return <div className="text-center text-white">Aucune donnée de film disponible</div>;
 
-  if (isLoading) return <div>Chargement...</div>;
-  if (error) return <div>Une erreur est survenue: {JSON.stringify(error)}</div>;
-  if (!movie) return <div>Aucune donnée de film disponible</div>;
+  const backdropUrl = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
 
   return (
-    <div className="bg-white p-4 rounded shadow">
-      <Button onClick={onClose} className="mb-4">
-        Retour
-      </Button>
-
-      <div className="flex gap-4">
-        <img src={movie.Poster} alt={movie.Title} className="h-auto" />
-        <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-bold mb-2">{movie.Title}</h2>
-          <p>
-            <strong>Année:</strong> {movie.Year}
-          </p>
-          <p>
-            <strong>Réalisateur:</strong> {movie.Director}
-          </p>
-          <p>
-            <strong>Synopsis:</strong> {movie.Plot}
-          </p>
-          <p>
-            <strong>Acteurs:</strong> {movie.Actors}
-          </p>
-          <p>
-            <strong>Genre:</strong> {movie.Genre}
-          </p>
-          <p>
-            <strong>Langue:</strong> {movie.Language}
-          </p>
-          <p>
-            <strong>Pays:</strong> {movie.Country}
-          </p>
-          <p>
-            <strong>Récompenses:</strong> {movie.Awards}
-          </p>
-          <p>
-            <strong>Box Office:</strong> {movie.BoxOffice}
-          </p>
-          <p>
-            <strong>Production:</strong> {movie.Production}
-          </p>
-          <p>
-            <strong>Site web:</strong> {movie.Website}
-          </p>
-        </div>{" "}
+    <div className="relative min-h-screen w-full">
+      <div 
+        className="absolute inset-0 bg-cover bg-center w-full" 
+        style={{ backgroundImage: `url(${backdropUrl})` }}
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-75"></div>
+      </div>
+      <div className="relative z-10 p-8">
+        <Button onClick={onClose} className="mb-4 bg-blue-600 hover:bg-blue-700">
+          Retour
+        </Button>
+        <div className="flex flex-col md:flex-row gap-8">
+          <img 
+            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+            alt={movie.title} 
+            className="w-full md:w-1/3 rounded-lg shadow-lg" 
+          />
+          <div className="flex-1 text-white">
+            <h2 className="text-4xl font-bold mb-2">{movie.title} ({new Date(movie.release_date).getFullYear()})</h2>
+            <p className="text-xl mb-4 text-gray-300">{movie.tagline}</p>
+            <div className="mb-4">
+              <span className="bg-blue-600 text-white text-lg font-bold py-1 px-3 rounded-full mr-2">
+                {Math.round(movie.vote_average * 10)}%
+              </span>
+              <span className="text-gray-300">Score d'évaluation</span>
+            </div>
+            <p className="text-lg mb-4">{movie.overview}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-bold">Genre</p>
+                <p>{movie.genres.map(g => g.name).join(", ")}</p>
+              </div>
+              <div>
+                <p className="font-bold">Durée</p>
+                <p>{movie.runtime} minutes</p>
+              </div>
+              <div>
+                <p className="font-bold">Budget</p>
+                <p>${movie.budget.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="font-bold">Recettes</p>
+                <p>${movie.revenue.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="font-bold">Statut</p>
+                <p>{movie.status}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

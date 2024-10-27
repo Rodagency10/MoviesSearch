@@ -1,20 +1,20 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 interface FilterContextType {
-  genre: string;
-  year: string;
-  setGenre: (genre: string) => void;
-  setYear: (year: string) => void;
+  genreId: number | undefined;
+  setGenreId: (genreId: number | undefined) => void;
+  releaseYear: number | undefined;
+  setReleaseYear: (year: number | undefined) => void;
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 export const FilterProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [genre, setGenre] = useState('');
-  const [year, setYear] = useState('');
+  const [genreId, setGenreId] = useState<number | undefined>(undefined);
+  const [releaseYear, setReleaseYear] = useState<number | undefined>(undefined);
 
   return (
-    <FilterContext.Provider value={{ genre, year, setGenre, setYear }}>
+    <FilterContext.Provider value={{ genreId, setGenreId, releaseYear, setReleaseYear }}>
       {children}
     </FilterContext.Provider>
   );
