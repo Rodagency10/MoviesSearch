@@ -51,7 +51,7 @@ Cette application est une interface de recherche de films utilisant l'API TMDB (
 
 ## Configuration
 
-L'application utilise une clé API pour TMDB. Assurez-vous de remplacer `API_KEY` dans `src/services/moviesAPI.ts` par votre propre clé API.
+L'application utilise une clé API pour TMDB. Assurez-vous de définir `VITE_TMDB_API_KEY` dans votre fichier `.env`.
 
 ## Utilisation
 

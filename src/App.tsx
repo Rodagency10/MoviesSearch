@@ -15,7 +15,7 @@ const App: React.FC = () => {
         <div className="min-h-screen">
           <div
             className="bg-cover bg-center bg-no-repeat h-56"
-            style={{ backgroundImage: `url(/public/homepage_banner.jpg)` }}
+            style={{ backgroundImage: `url(/homepage_banner.jpg)` }}
           >
             <header className="p-8 text-center bg-gradient-to-b from-blue-900 to-blue-700 opacity-80 flex flex-col justify-center items-center h-full text-white">
               <h1 className="text-4xl font-bold mb-2">Bienvenue,</h1>

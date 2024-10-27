@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const API_KEY = '5813242591ea6b7fafb1aaf1a699b247';
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 interface Genre {
   id: number;
