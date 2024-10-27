@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import MovieItem from '../src/components/MovieItem';
 import '@testing-library/jest-dom';
