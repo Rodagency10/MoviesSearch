@@ -7,6 +7,7 @@ const FilterBar: React.FC = () => {
   const { data: genresData } = useGetGenresQuery();
 
   const currentYear = new Date().getFullYear();
+  // création d'un tableau avec les 50 dernières années à partir de 2024
   const years = Array.from({ length: 50 }, (_, i) => currentYear - i);
 
   return (
