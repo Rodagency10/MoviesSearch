@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSearchMoviesWithDetailsQuery } from "../services/omdbApi";
+import { useSearchMoviesQuery } from "../services/omdbApi";
 import { useFilter } from "../contexts/FilterContext";
 import { Button } from "./ui/button";
 import { useSelector, useDispatch } from "react-redux";
@@ -15,11 +15,15 @@ const MovieList: React.FC<MovieListProps> = ({ onSelectMovie }) => {
   const { genre, year } = useFilter();
   const dispatch = useDispatch();
   const search = useSelector((state: RootState) => state.search.searchTerm);
-  const { data: movies, error, isLoading } = useSearchMoviesWithDetailsQuery({ search, page });
+  const { data, error, isLoading } = useSearchMoviesQuery({ search, page });
 
-  const filteredMovies = movies?.filter(
+  console.log(data);
+
+  console.log(genre);
+
+  const filteredMovies = data?.Search?.filter(
     (movie) =>
-      (!genre || movie.Genre?.split(", ").includes(genre)) &&
+      (!genre || movie.Genre?.split(",").includes(genre)) &&
       (!year || movie.Year === year)
   );
 
@@ -35,27 +39,22 @@ const MovieList: React.FC<MovieListProps> = ({ onSelectMovie }) => {
         placeholder="Rechercher des films..."
         className="mb-4 p-2 border rounded"
       />
-      {filteredMovies && filteredMovies.length > 0 ? (
-        <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredMovies.map((movie) => (
-            <li key={movie.imdbID} className="border p-4 rounded">
-              <img
-                src={movie.Poster}
-                alt={movie.Title}
-                className="w-full h-auto"
-              />
-              <h3 className="font-bold">{movie.Title}</h3>
-              <p>{movie.Year}</p>
-              <p>{movie.Genre}</p>
-              <Button onClick={() => onSelectMovie(movie.imdbID)}>
-                Voir les détails
-              </Button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>Aucun film trouvé</p>
-      )}
+      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredMovies?.map((movie) => (
+          <li key={movie.imdbID} className="border p-4 rounded">
+            <img
+              src={movie.Poster}
+              alt={movie.Title}
+              className="w-full h-auto"
+            />
+            <h3 className="font-bold">{movie.Title}</h3>
+            <p>{movie.Year}</p>
+            <Button onClick={() => onSelectMovie(movie.imdbID)}>
+              Voir les détails
+            </Button>
+          </li>
+        ))}
+      </ul>
       <div className="mt-4">
         <Button onClick={() => setPage(page - 1)} disabled={page === 1}>
           Précédent

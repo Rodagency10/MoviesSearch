@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_KEY = 'ed5c2f55';
 
+// Définir les types pour les réponses de l'API
 interface Movie {
   imdbID: string;
   Title: string;
@@ -47,47 +48,11 @@ export const omdbApi = createApi({
   endpoints: (builder) => ({
     searchMovies: builder.query<SearchResponse, { search: string; page: number }>({
       query: ({ search = "social", page = 1 }) => `?apikey=${API_KEY}&s=${search}&page=${page}`,
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const { data } = await queryFulfilled;
-          data.Search.forEach(movie => {
-            dispatch(
-              omdbApi.util.updateQueryData('getMovieDetails', movie.imdbID, () => {
-                return { ...movie } as MovieDetails;
-              })
-            );
-            dispatch(omdbApi.endpoints.getMovieDetails.initiate(movie.imdbID));
-          });
-        } catch (error) {
-          console.error("Error fetching movie details:", error);
-        }
-      },
     }),
     getMovieDetails: builder.query<MovieDetails, string>({
       query: (imdbID) => `?apikey=${API_KEY}&i=${imdbID}`,
     }),
-    searchMoviesWithDetails: builder.query<MovieDetails[], { search: string; page: number }>({
-      async queryFn(arg, queryApi, extraOptions, baseQuery) {
-        const searchResult = await baseQuery(`?apikey=${API_KEY}&s=${arg.search}&page=${arg.page}`);
-        if (searchResult.error) return { error: searchResult.error };
-        
-        const searchData = searchResult.data as SearchResponse;
-        if (!searchData.Search || !Array.isArray(searchData.Search)) {
-          return { data: [] };
-        }
-        
-        const detailsPromises = searchData.Search.map(movie => 
-          baseQuery(`?apikey=${API_KEY}&i=${movie.imdbID}`)
-        );
-        const detailsResults = await Promise.all(detailsPromises);
-        const validDetails = detailsResults
-          .filter((result): result is { data: MovieDetails } => 'data' in result)
-          .map(result => result.data as MovieDetails);
-        
-        return { data: validDetails };
-      },
-    }),
   }),
 });
 
-export const { useSearchMoviesQuery, useGetMovieDetailsQuery, useSearchMoviesWithDetailsQuery } = omdbApi;
+export const { useSearchMoviesQuery, useGetMovieDetailsQuery } = omdbApi;
