@@ -2,7 +2,6 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_KEY = 'ed5c2f55';
 
-// Définir les types pour les réponses de l'API
 interface Movie {
   imdbID: string;
   Title: string;
